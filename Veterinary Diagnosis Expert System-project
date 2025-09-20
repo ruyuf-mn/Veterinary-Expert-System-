@@ -1,0 +1,509 @@
+(deftemplate pet
+    (slot type)) 
+
+(deftemplate symptom
+    (slot name))
+
+(deftemplate diagnosis
+    (slot pet-type) 
+    (slot condition)) 
+
+(deffunction ask-yes-no (?question)
+    (printout t ?question " (yes/no): ")
+    (bind ?response (read))
+    (while (and (neq ?response yes) (neq ?response no)) do
+        (printout t "Invalid input. Please type yes or no only: " crlf)
+        (printout t ?question " (yes/no): ")
+        (bind ?response (read))
+    )
+    (return ?response)
+)
+
+
+(defrule welcome
+(declare (salience 1000))
+    =>
+    (printout t crlf
+        "Welcome to the Veterinary Diagnosis Expert System" crlf
+        "This system will help you diagnose your pet based on symptoms" crlf
+        "Please answer the following questions by yes/no" crlf crlf))
+(deffunction ask-yes-no (?question)
+    (printout t ?question " (yes/no): ")
+    (bind ?response (read))
+    (while (and (neq ?response yes) (neq ?response no)) do
+        (printout t "Invalid input. Please type yes or no only: " crlf)
+        (printout t ?question " (yes/no): ")
+        (bind ?response (read))
+    )
+    (return ?response)
+)
+
+(defrule select-pet-type
+    (not (pet))
+=>
+    (bind ?answer (ask-yes-no "Is your pet a cat?"))
+    (if (eq ?answer yes) then
+        (assert (pet (type cat)))
+    else
+        (bind ?dog-answer (ask-yes-no "Is your pet a dog?"))
+        (if (eq ?dog-answer yes) then
+            (assert (pet (type dog)))
+        else
+            (printout t crlf "No pet selected, Thank you." crlf)
+            (halt)
+        )
+    )
+)
+
+(defrule ask-fever
+    (pet (type cat))
+    (not (asked fever))
+=>
+    (bind ?fever (ask-yes-no "Does your cat have fever?"))
+    (if (eq ?fever yes) then
+        (assert (symptom (name fever)))
+        (assert (asked fever))
+        (assert (need-to-ask sneezing))
+    else
+        (assert (no-fever))
+        (assert (asked fever))
+    )
+)
+
+(defrule ask-sneezing
+    (pet (type cat))
+    (need-to-ask sneezing)
+=>
+    (bind ?sneezing (ask-yes-no "Does your cat have sneezing?"))
+    (if (eq ?sneezing yes) then
+        (assert (symptom (name sneezing)))
+        (assert (diagnosis (pet-type cat) (condition "Upper Respiratory Infection")))
+        (printout t crlf "Diagnosis: Upper Respiratory Infection." crlf)
+        (halt)
+    else
+        (assert (no-sneezing))
+    )
+)
+
+(defrule ask-vomiting
+    (pet (type cat))
+    (no-fever)
+    (not (asked vomiting))
+=>
+    (bind ?vomiting (ask-yes-no "Does your cat have vomiting?"))
+    (if (eq ?vomiting yes) then
+        (assert (symptom (name vomiting)))
+        (assert (asked vomiting))
+        (assert (need-to-ask diarrhea))
+    else
+        (assert (no-vomiting))
+        (assert (asked vomiting))
+    )
+)
+
+(defrule ask-diarrhea
+    (pet (type cat))
+    (need-to-ask diarrhea)
+=>
+    (bind ?diarrhea (ask-yes-no "Does your cat have diarrhea?"))
+    (if (eq ?diarrhea yes) then
+        (assert (symptom (name diarrhea)))
+        (assert (diagnosis (pet-type cat) (condition "Gastroenteritis")))
+        (printout t crlf "Diagnosis: Gastroenteritis." crlf)
+        (halt)
+    else
+        (assert (no-diarrhea))
+    )
+)
+
+(defrule ask-lethargy
+    (pet (type cat))
+    (no-vomiting)
+    (not (asked lethargy))
+=>
+    (bind ?lethargy (ask-yes-no "Does your cat have lethargy?"))
+    (if (eq ?lethargy yes) then
+        (assert (symptom (name lethargy)))
+        (assert (asked lethargy))
+        (assert (need-to-ask jaundice))
+    else
+        (assert (no-lethargy))
+        (assert (asked lethargy))
+    )
+)
+
+(defrule ask-jaundice
+    (pet (type cat))
+    (need-to-ask jaundice)
+=>
+    (bind ?jaundice (ask-yes-no "Does your cat have jaundice?"))
+    (if (eq ?jaundice yes) then
+        (assert (symptom (name jaundice)))
+        (assert (diagnosis (pet-type cat) (condition "Liver Disease")))
+        (printout t crlf "Diagnosis: Liver Disease." crlf)
+        (halt)
+    else
+        (assert (no-jaundice))
+    )
+)
+
+(defrule ask-itching
+    (pet (type cat))
+    (no-lethargy)
+    (not (asked itching))
+=>
+    (bind ?itching (ask-yes-no "Does your cat have itching?"))
+    (if (eq ?itching yes) then
+        (assert (symptom (name itching)))
+        (assert (asked itching))
+        (assert (need-to-ask hair_loss))
+    else
+        (assert (no-itching))
+        (assert (asked itching))
+    )
+)
+
+(defrule ask-hair-loss
+    (pet (type cat))
+    (need-to-ask hair_loss)
+=>
+    (bind ?hair_loss (ask-yes-no "Does your cat have hair loss?"))
+    (if (eq ?hair_loss yes) then
+        (assert (symptom (name hair_loss)))
+        (assert (diagnosis (pet-type cat) (condition "Fungal Infection")))
+        (printout t crlf "Diagnosis: Fungal Infection." crlf)
+        (halt)
+    else
+        (assert (no-hair_loss))
+    )
+)
+
+(defrule ask-rapid-breathing
+    (pet (type cat))
+    (no-itching)
+    (not (asked rapid_breathing))
+=>
+    (bind ?rapid_breathing (ask-yes-no "Does your cat have rapid breathing?"))
+    (if (eq ?rapid_breathing yes) then
+        (assert (symptom (name rapid_breathing)))
+        (assert (asked rapid_breathing))
+        (assert (need-to-ask pale_gums))
+    else
+        (assert (no-rapid_breathing))
+        (assert (asked rapid_breathing))
+    )
+)
+
+(defrule ask-pale-gums
+    (pet (type cat))
+    (need-to-ask pale_gums)
+=>
+    (bind ?pale_gums (ask-yes-no "Does your cat have pale gums?"))
+    (if (eq ?pale_gums yes) then
+        (assert (symptom (name pale_gums)))
+        (assert (diagnosis (pet-type cat) (condition "Anemia")))
+        (printout t crlf "Diagnosis: Anemia." crlf)
+        (halt)
+    else
+        (assert (no-pale_gums))
+    )
+)
+
+(defrule ask-seizures
+    (pet (type cat))
+    (no-rapid_breathing)
+    (not (asked seizures))
+=>
+    (bind ?seizures (ask-yes-no "Does your cat have seizures?"))
+    (if (eq ?seizures yes) then
+        (assert (symptom (name seizures)))
+        (assert (asked seizures))
+        (assert (need-to-ask dehydration))
+    else
+        (assert (no-seizures))
+        (assert (asked seizures))
+    )
+)
+
+(defrule ask-dehydration
+    (pet (type cat))
+    (need-to-ask dehydration)
+=>
+    (bind ?dehydration (ask-yes-no "Does your cat have dehydration?"))
+    (if (eq ?dehydration yes) then
+        (assert (symptom (name dehydration)))
+        (assert (diagnosis (pet-type cat) (condition "Neurological Disorder")))
+        (printout t crlf "Diagnosis: Neurological Disorder." crlf)
+        (halt)
+    else
+        (assert (no-dehydration))
+    )
+)
+
+(defrule ask-nasal-discharge
+    (pet (type cat))
+    (no-seizures)
+    (not (asked nasal_discharge))
+=>
+    (bind ?nasal_discharge (ask-yes-no "Does your cat have nasal discharge?"))
+    (if (eq ?nasal_discharge yes) then
+        (assert (symptom (name nasal_discharge)))
+        (assert (asked nasal_discharge))
+        (assert (need-to-ask eye_discharge))
+    else
+        (assert (no-nasal_discharge))
+        (assert (asked nasal_discharge))
+    )
+)
+
+(defrule ask-eye-discharge
+    (pet (type cat))
+    (need-to-ask eye_discharge)
+=>
+    (bind ?eye_discharge (ask-yes-no "Does your cat have eye discharge?"))
+    (if (eq ?eye_discharge yes) then
+        (assert (symptom (name eye_discharge)))
+        (assert (diagnosis (pet-type cat) (condition "Feline Herpesvirus")))
+        (printout t crlf "Diagnosis: Feline Herpesvirus." crlf)
+        (halt)
+    else
+        (assert (no-eye_discharge))
+    )
+)
+
+(deffunction ask-yes-no (?question)
+    (printout t ?question " (yes/no): ")
+    (bind ?response (read))
+    (while (and (neq ?response yes) (neq ?response no)) do
+        (printout t "Invalid input. Please type yes or no only: " crlf)
+        (printout t ?question " (yes/no): ")
+        (bind ?response (read))
+    )
+    (return ?response)
+)
+
+(defrule ask-dog-fever
+    (pet (type dog))
+    (not (asked-dog-fever))
+=>
+    (bind ?fever (ask-yes-no "Does your dog have fever?"))
+    (if (eq ?fever yes) then
+        (assert (symptom (name fever)))
+        (assert (asked-dog-fever))
+        (assert (need-to-ask-dog-coughing))
+    else
+        (assert (no-dog-fever))
+        (assert (asked-dog-fever))
+    )
+)
+
+(defrule ask-dog-coughing
+    (pet (type dog))
+    (need-to-ask-dog-coughing)
+=>
+    (bind ?coughing (ask-yes-no "Does your dog have coughing?"))
+    (if (eq ?coughing yes) then
+        (assert (symptom (name coughing)))
+        (assert (diagnosis (pet-type dog) (condition "Respiratory Infection")))
+        (printout t crlf "Diagnosis: Respiratory Infection." crlf)
+        (halt)
+    else
+        (assert (no-dog-coughing))
+    )
+)
+
+(defrule ask-dog-vomiting
+    (pet (type dog))
+    (no-dog-fever)
+    (not (asked-dog-vomiting))
+=>
+    (bind ?vomiting (ask-yes-no "Does your dog have vomiting?"))
+    (if (eq ?vomiting yes) then
+        (assert (symptom (name vomiting)))
+        (assert (asked-dog-vomiting))
+        (assert (need-to-ask-dog-diarrhea))
+    else
+        (assert (no-dog-vomiting))
+        (assert (asked-dog-vomiting))
+    )
+)
+
+(defrule ask-dog-diarrhea
+    (pet (type dog))
+    (need-to-ask-dog-diarrhea)
+=>
+    (bind ?diarrhea (ask-yes-no "Does your dog have diarrhea?"))
+    (if (eq ?diarrhea yes) then
+        (assert (symptom (name diarrhea)))
+        (assert (diagnosis (pet-type dog) (condition "Gastroenteritis")))
+        (printout t crlf "Diagnosis: Gastroenteritis." crlf)
+        (halt)
+    else
+        (assert (no-dog-diarrhea))
+    )
+)
+
+(defrule ask-dog-lethargy
+    (pet (type dog))
+    (no-dog-vomiting)
+    (not (asked-dog-lethargy))
+=>
+    (bind ?lethargy (ask-yes-no "Does your dog have lethargy?"))
+    (if (eq ?lethargy yes) then
+        (assert (symptom (name lethargy)))
+        (assert (asked-dog-lethargy))
+        (assert (need-to-ask-dog-lameness))
+    else
+        (assert (no-dog-lethargy))
+        (assert (asked-dog-lethargy))
+    )
+)
+
+(defrule ask-dog-lameness
+    (pet (type dog))
+    (need-to-ask-dog-lameness)
+=>
+    (bind ?lameness (ask-yes-no "Does your dog have lameness?"))
+    (if (eq ?lameness yes) then
+        (assert (symptom (name lameness)))
+        (assert (asked-dog-lameness))
+        (assert (need-to-ask-dog-swelling))
+    else
+        (assert (no-dog-lameness))
+        (assert (asked-dog-lameness))
+    )
+)
+
+(defrule ask-dog-swelling
+    (pet (type dog))
+    (need-to-ask-dog-swelling)
+=>
+    (bind ?swelling (ask-yes-no "Does your dog have swelling?"))
+    (if (eq ?swelling yes) then
+        (assert (symptom (name swelling)))
+        (assert (diagnosis (pet-type dog) (condition "Arthritis")))
+        (printout t crlf "Diagnosis: Arthritis." crlf)
+        (halt)
+    else
+        (assert (no-dog-swelling))
+    )
+)
+
+(defrule ask-dog-skinrash
+    (pet (type dog))
+    (no-dog-lameness)
+    (not (asked-dog-skinrash))
+=>
+    (bind ?rash (ask-yes-no "Does your dog have skin rash?"))
+    (if (eq ?rash yes) then
+        (assert (symptom (name skin_rash)))
+        (assert (asked-dog-skinrash))
+        (assert (need-to-ask-dog-itching))
+    else
+        (assert (no-dog-skinrash))
+        (assert (asked-dog-skinrash))
+    )
+)
+
+(defrule ask-dog-itching
+    (pet (type dog))
+    (need-to-ask-dog-itching)
+=>
+    (bind ?itching (ask-yes-no "Does your dog have itching?"))
+    (if (eq ?itching yes) then
+        (assert (symptom (name itching)))
+        (assert (diagnosis (pet-type dog) (condition "Flea Allergy Dermatitis")))
+        (printout t crlf "Diagnosis: Flea Allergy Dermatitis." crlf)
+        (halt)
+    else
+        (assert (no-dog-itching))
+    )
+)
+
+(defrule ask-dog-excessive-thirst
+    (pet (type dog))
+    (no-dog-skinrash)
+    (not (asked-dog-excessive-thirst))
+=>
+    (bind ?thirst (ask-yes-no "Does your dog have excessive thirst?"))
+    (if (eq ?thirst yes) then
+        (assert (symptom (name excessive_thirst)))
+        (assert (asked-dog-excessive-thirst))
+        (assert (need-to-ask-dog-weightloss))
+    else
+        (assert (no-dog-excessive-thirst))
+        (assert (asked-dog-excessive-thirst))
+    )
+)
+
+(defrule ask-dog-weightloss
+    (pet (type dog))
+    (need-to-ask-dog-weightloss)
+=>
+    (bind ?loss (ask-yes-no "Does your dog have weight loss?"))
+    (if (eq ?loss yes) then
+        (assert (symptom (name weight_loss)))
+        (assert (diagnosis (pet-type dog) (condition "Diabetes")))
+        (printout t crlf "Diagnosis: Diabetes." crlf)
+        (halt)
+    else
+        (assert (no-dog-weightloss))
+    )
+)
+
+(defrule ask-dog-breathing-difficulty
+    (pet (type dog))
+    (no-dog-excessive-thirst)
+    (not (asked-dog-breathing-difficulty))
+=>
+    (bind ?breath (ask-yes-no "Does your dog have breathing difficulty?"))
+    (if (eq ?breath yes) then
+        (assert (symptom (name breathing_difficulty)))
+        (assert (asked-dog-breathing-difficulty))
+        (assert (need-to-ask-dog-bloody-stool))
+    else
+        (assert (no-dog-breathing-difficulty))
+        (assert (asked-dog-breathing-difficulty))
+    )
+)
+
+(defrule ask-dog-bloody-stool
+    (pet (type dog))
+    (need-to-ask-dog-bloody-stool)
+=>
+    (bind ?bloody (ask-yes-no "Does your dog have bloody stool?"))
+    (if (eq ?bloody yes) then
+        (assert (symptom (name bloody_stool)))
+        (assert (diagnosis (pet-type dog) (condition "Internal Bleeding")))
+        (printout t crlf "Diagnosis: Internal Bleeding." crlf)
+        (halt)
+    else
+        (assert (no-dog-bloody-stool))
+    )
+)
+
+(defrule ask-dog-eye-discharge
+    (pet (type dog))
+    (no-dog-breathing-difficulty)
+    (not (asked-dog-eye-discharge))
+=>
+    (bind ?eye (ask-yes-no "Does your dog have eye discharge?"))
+    (if (eq ?eye yes) then
+        (assert (symptom (name eye_discharge)))
+    )
+    (assert (asked-dog-eye-discharge))
+)
+
+(defrule ask-dog-aggression
+    (pet (type dog))
+    (not (asked-dog-aggression))
+=>
+    (bind ?agg (ask-yes-no "Does your dog have aggression?"))
+    (if (eq ?agg yes) then
+        (assert (symptom (name aggression)))
+        (assert (diagnosis (pet-type dog) (condition "Possible Rabies")))
+        (printout t crlf "Diagnosis: Possible Rabies. Immediate vet attention needed!" crlf)
+        (halt)
+    )
+    (assert (asked-dog-aggression))
+)
